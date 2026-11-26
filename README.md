@@ -30,11 +30,16 @@ Không cần cài đặt gì thêm. Không có dependency ngoài: không CDN fon
 
 ## Trong trận
 
-- Map lục giác **32×24 = 768 ô**, hiện full màn hình.
-- Thanh trên cùng: thông số chung (vàng, dân, đất đang giữ, thời gian) + thông số riêng
-  cho Vua và cho Tướng. Nhóm của bạn được đánh dấu “BẠN”.
-- Bấm vào một ô để xem địa hình, chi phí di chuyển, phòng thủ và hành động theo vai trò:
-  Tướng chiếm đất / mỏ, Vua xây nhà / tuyển quân.
+- Màn hình ngang, map lục giác **32×24 = 768 ô** hiện full màn hình. Map gọn, màu
+  địa hình dịu, không có nhãn tọa độ hay nút bật/tắt rườm rà. Kéo để di chuyển map,
+  lăn chuột / nút + − để zoom.
+- Thanh thông số là một lớp mỏng đè trên cạnh trên của map (không đẩy map xuống):
+  thông số chung (vàng, dân, đất đang giữ, thời gian) + thông số riêng gọn cho
+  Vua và cho Tướng. Nhóm của bạn được đánh dấu “BẠN”.
+- Bấm vào một ô sẽ hiện panel nhỏ gọn ở góc dưới phải: tên địa hình, chủ, chi phí
+  di chuyển, phòng thủ và nút hành động theo vai trò (Tướng chiếm đất / mỏ,
+  Vua xây nhà / tuyển quân), kèm nút chuyển quân của Tướng. Không có panel luật
+  hay đoạn giải thích dài trong màn hình trận.
 - Vùng trung lập ở giữa hiện xám khi chưa ai chiếm, chỉ hiện màu phe khi phe đó tới chiếm.
   Vùng trung lập có mỏ, nhà thờ, thành, đất bồi, **không có núi**. Ai cũng có thể chiếm.
 
@@ -90,8 +95,9 @@ Các mục trên là kế hoạch, **chưa được triển khai trong bản dem
 A vanilla HTML/CSS/JS demo client (no dependencies, works offline) for a 6-player,
 3v3 ancient/medieval strategy game: 1 King + 2 Generals per team. Flow: enter name →
 “waiting for host” barrier → simulated host `OPEN_BARRIER` (real host/P2P not built yet)
-→ pick Red or Blue → random King draw → loading screen → full-screen 32×24 hex map
-(768 hexes) with common + King/General stats and clickable hexes. Settled rules include
+→ pick Red or Blue → random King draw → loading screen → landscape full-screen
+32×24 hex map (768 hexes) with a slim stats bar overlaid on the top edge of the map
+and a compact clickable-hex panel (no rules text in the match screen). Settled rules include
 3 lives for Generals, 1 life for the King, 5,000 starting infantry per General,
 10 cities per side, and +30% money for the smaller team on an odd split (e.g. 7 = 3 vs 4).
 Networking is P2P on the same WiFi only, no TURN relay. Run locally by opening

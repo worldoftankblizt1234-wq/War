@@ -104,6 +104,32 @@ var state = {
   map: [] // {col,row,terrain,owner} owner: "blue"|"red"|null
 };
 
+// ---- Map view: pan + zoom, map full màn hình ----
+var view = { x: 0, y: 0, scale: 1, dragged: false };
+function applyView() {
+  $("map").style.transform = "translate(" + view.x + "px," + view.y + "px) scale(" + view.scale + ")";
+}
+function fitView() {
+  var vp = $("map-viewport");
+  if (!vp) return;
+  var mapW = COLS * 34 + 17, mapH = ROWS * 30;
+  var s = Math.min(vp.clientWidth / mapW, vp.clientHeight / mapH, 1.15);
+  if (s < 0.4) s = 0.4;
+  view.scale = s;
+  view.x = (vp.clientWidth - mapW * s) / 2;
+  view.y = (vp.clientHeight - mapH * s) / 2;
+  applyView();
+}
+function zoomAt(factor) {
+  var vp = $("map-viewport");
+  var cx = vp.clientWidth / 2, cy = vp.clientHeight / 2;
+  var ns = Math.min(2.2, Math.max(0.4, view.scale * factor));
+  view.x = cx - (cx - view.x) * (ns / view.scale);
+  view.y = cy - (cy - view.y) * (ns / view.scale);
+  view.scale = ns;
+  applyView();
+}
+
 function $(id) { return document.getElementById(id); }
 function showScreen(id) {
   document.querySelectorAll(".screen").forEach(function (s) { s.classList.remove("active"); });
@@ -203,9 +229,10 @@ $("btn-draw").addEventListener("click", function () {
       state.role = kingIndex === 0 ? "king" : "general";
       var res = $("draw-result");
       if (state.role === "king") {
-        res.innerHTML = "<strong>" + state.name + " làm VUA.</strong> Vua có 1 mạng — Vua chết là thua, nhưng có thể chạy trốn với hộ tống. Vua lo xây thành / nhà, tăng dân, tuyển quân.";
+        res.innerHTML = "<strong>" + state.name + " là VUA</strong> · 1 mạng";
       } else {
-        res.innerHTML = "<strong>" + slots[kingIndex].textContent + " làm Vua. " + state.name + " làm TƯỚNG.</strong> Tướng có 3 mạng, quân khởi đầu 5.000 bộ binh, có 5 trại lớn và 5 phó tướng.";
+        res.innerHTML = "<strong>" + slots[kingIndex].textContent + " là Vua</strong> · " +
+          state.name + " là TƯỚNG · 3 mạng · 5.000 bộ binh";
       }
       res.hidden = false;
       $("btn-to-loading").disabled = false;
@@ -236,11 +263,15 @@ function enterMatch() {
   showScreen("screen-match");
   renderMap();
   updateHUD();
+  var hudTeam = $("hud-team");
+  hudTeam.classList.add("team-" + state.team);
+  hudTeam.querySelector("b").textContent = teamName(state.team);
   // Đánh dấu nhóm của bạn (Vua hay Tướng).
   $("group-king").classList.toggle("you", state.role === "king");
   $("group-general").classList.toggle("you", state.role === "general");
   $("mark-king").hidden = state.role !== "king";
   $("mark-general").hidden = state.role !== "general";
+  fitView();
   if (!state.timerId) {
     state.timerId = setInterval(function () {
       state.timeSec++;
@@ -251,7 +282,7 @@ function enterMatch() {
   }
 }
 
-// ---- 6. Map lục giác 32x24 ----
+// ---- 6. Map lục giác 32x24, full màn hình ----
 function renderMap() {
   var mapEl = $("map");
   mapEl.innerHTML = "";
@@ -275,7 +306,10 @@ function renderMap() {
       if (owner) btn.classList.add("owner-" + owner);
       else btn.classList.add("owner-neutral");
       (function (h, el) {
-        el.addEventListener("click", function () { selectHex(h, el); });
+        el.addEventListener("click", function () {
+          if (view.dragged) { view.dragged = false; return; }
+          selectHex(h, el);
+        });
       })(hex, btn);
       rowEl.appendChild(btn);
     }
@@ -294,27 +328,34 @@ function updateLandHeld() {
 function updateHUD() {
   $("stat-gold").textContent = fmt(state.gold);
   $("stat-pop").textContent = fmt(state.pop);
-  $("stat-troops").textContent = fmt(state.troops.infantry + state.troops.archer + state.troops.catapult) + " (bộ binh " + fmt(state.troops.infantry) + ")";
+  var total = state.troops.infantry + state.troops.archer + state.troops.catapult;
+  $("stat-troops").textContent = fmt(total);
   $("troop-infantry").textContent = fmt(state.troops.infantry);
   $("troop-archer").textContent = fmt(state.troops.archer);
   $("troop-catapult").textContent = fmt(state.troops.catapult);
   updateLandHeld();
 }
 
+// Panel ô đã chọn: gọn, chỉ tên ô, chủ, 2 chỉ số và nút hành động.
 function selectHex(hex, el) {
   document.querySelectorAll(".hex.selected").forEach(function (h) { h.classList.remove("selected"); });
   el.classList.add("selected");
   state.selected = hex;
   var t = TERRAIN[hex.terrain];
-  var ownerText = hex.owner === null ? "Trung lập — chưa ai chiếm (xám)" :
-    hex.owner === "blue" ? "Đội Xanh" : "Đội Đỏ";
-  var html = "<strong>" + t.label + " (" + hex.col + "," + hex.row + ")</strong><br>" +
-    "Chủ: " + ownerText + "<br>" +
-    "Chi phí di chuyển: " + t.cost + " (demo) · Phòng thủ: +" + t.defence + " (demo)<br>";
-  if (hex.terrain === "palace") html += "Cung điện. Vua ở đây được thủ đô 100.000 quân bảo vệ (đã chốt).";
-  if (hex.terrain === "camp") html += "Trại lớn của Tướng: điểm hồi sinh khi Tướng chết, chứa quân của Tướng đó.";
-  if (hex.terrain === "recruitment") html += "Trại tuyển quân của Vua.";
-  $("hex-info").innerHTML = html;
+  $("sel-name").textContent = t.label + " · " + hex.col + "," + hex.row;
+  var ownerEl = $("sel-owner");
+  ownerEl.textContent = hex.owner === null ? "TRUNG LẬP" : hex.owner === "blue" ? "ĐỘI XANH" : "ĐỘI ĐỎ";
+  ownerEl.className = "owner-chip" + (hex.owner ? " owner-" + hex.owner : "");
+  $("sel-cost").textContent = t.cost + " (demo)";
+  $("sel-def").textContent = "+" + t.defence + " (demo)";
+  var note = "—";
+  if (hex.terrain === "palace") note = "Cung điện · Thủ đô 100.000 quân.";
+  else if (hex.terrain === "camp") note = "Trại lớn · Điểm hồi sinh của Tướng.";
+  else if (hex.terrain === "recruitment") note = "Trại tuyển quân của Vua.";
+  else if (hex.terrain === "mine") note = "Mỏ vàng.";
+  else if (hex.terrain === "church") note = "Nhà thờ.";
+  else if (hex.terrain === "city") note = "Thành trung lập.";
+  $("sel-note").textContent = note;
 
   var actions = $("hex-actions");
   actions.innerHTML = "";
@@ -328,52 +369,100 @@ function selectHex(hex, el) {
   }
 
   if (role === "general" && hex.owner === null) {
-    addButton("Chiếm ô này (Tướng)", function () {
+    addButton("Chiếm ô này", function () {
       hex.owner = team;
       el.classList.remove("owner-neutral");
       el.classList.add("owner-" + team);
       if (hex.terrain === "mine") {
         state.gold += DEMO_MINE_GOLD; // demo-only
-        $("hex-info").innerHTML += "<br>Đã chiếm mỏ: +" + DEMO_MINE_GOLD + " vàng (demo).";
+        $("sel-note").textContent = "Đã chiếm mỏ: +" + DEMO_MINE_GOLD + " vàng (demo).";
       } else {
-        $("hex-info").innerHTML += "<br>Đã chiếm ô. Ô này giờ hiện màu đội bạn.";
+        $("sel-note").textContent = "Đã chiếm ô.";
       }
       updateHUD();
       selectHexRefresh(hex);
     });
   }
   if (role === "general" && hex.owner !== null && hex.owner !== team) {
-    var note = document.createElement("p");
-    note.className = "hint";
-    note.textContent = "Ô của địch — cần đánh chiếm. Combat thật chưa được xây trong demo này.";
-    actions.appendChild(note);
+    var noteEl = document.createElement("p");
+    noteEl.className = "hint";
+    noteEl.textContent = "Ô của địch — cần đánh chiếm. Combat thật chưa có trong demo này.";
+    actions.appendChild(noteEl);
   }
   if (role === "king" && (hex.terrain === "plains" || hex.terrain === "alluvial")) {
-    addButton("Xây nhà (Vua) — " + DEMO_HOUSE_COST + " vàng (demo)", function () {
+    addButton("Xây nhà — " + DEMO_HOUSE_COST + " vàng (demo)", function () {
       if (state.gold < DEMO_HOUSE_COST) { alert("Không đủ vàng (demo)."); return; }
       state.gold -= DEMO_HOUSE_COST;
       state.pop += 20; // đã chốt: 1 nhà ≈ 20 người
-      $("hex-info").innerHTML += "<br>Đã xây 1 nhà: +" + 20 + " dân (đã chốt: 1 nhà ≈ 20 người).";
+      $("sel-note").textContent = "Đã xây 1 nhà: +20 dân.";
       updateHUD();
     });
-    addButton("Tuyển quân (Vua) — +100 lính (demo)", function () {
+    addButton("Tuyển quân — +100 lính (demo)", function () {
       state.troops.infantry += DEMO_RECRUIT_TROOPS; // demo-only, tuyển thêm không giới hạn (đã chốt)
-      $("hex-info").innerHTML += "<br>Đã tuyển thêm " + DEMO_RECRUIT_TROOPS + " lính (demo). Tổng quân tăng, không giới hạn.";
+      $("sel-note").textContent = "Đã tuyển thêm " + DEMO_RECRUIT_TROOPS + " lính (demo).";
       updateHUD();
     });
   }
   if (!actions.children.length) {
     var p = document.createElement("p");
     p.className = "hint";
-    p.textContent = "Không có hành động cho vai trò của bạn ở ô này trong demo.";
+    p.textContent = "Không có hành động cho vai trò của bạn ở ô này.";
     actions.appendChild(p);
   }
 }
 function selectHexRefresh(hex) {
-  // Cập nhật lại dòng chủ sau khi chiếm ô.
+  // Cập nhật lại panel sau khi chiếm ô.
   var el = document.querySelector('.hex[data-col="' + hex.col + '"][data-row="' + hex.row + '"]');
   if (el) selectHex(hex, el);
 }
+$("sel-close").addEventListener("click", function () {
+  document.querySelectorAll(".hex.selected").forEach(function (h) { h.classList.remove("selected"); });
+  state.selected = null;
+  $("sel-name").textContent = "Chọn một ô";
+  $("sel-owner").textContent = "—";
+  $("sel-owner").className = "owner-chip";
+  $("sel-cost").textContent = "—";
+  $("sel-def").textContent = "—";
+  $("sel-note").textContent = "Chạm vào một ô trên map.";
+  $("hex-actions").innerHTML = "";
+});
+
+// ---- Kéo / zoom map ----
+(function () {
+  var vp = $("map-viewport");
+  var dragging = false, startX = 0, startY = 0, baseX = 0, baseY = 0, moved = 0;
+  vp.addEventListener("pointerdown", function (e) {
+    dragging = true; moved = 0;
+    startX = e.clientX; startY = e.clientY; baseX = view.x; baseY = view.y;
+    vp.classList.add("dragging");
+    vp.setPointerCapture(e.pointerId);
+  });
+  vp.addEventListener("pointermove", function (e) {
+    if (!dragging) return;
+    var dx = e.clientX - startX, dy = e.clientY - startY;
+    moved = Math.max(moved, Math.abs(dx) + Math.abs(dy));
+    view.x = baseX + dx; view.y = baseY + dy;
+    applyView();
+  });
+  function endDrag() {
+    if (!dragging) return;
+    dragging = false;
+    vp.classList.remove("dragging");
+    if (moved > 6) view.dragged = true;
+  }
+  vp.addEventListener("pointerup", endDrag);
+  vp.addEventListener("pointercancel", endDrag);
+  vp.addEventListener("wheel", function (e) {
+    e.preventDefault();
+    zoomAt(e.deltaY < 0 ? 1.12 : 1 / 1.12);
+  }, { passive: false });
+})();
+$("zoom-in").addEventListener("click", function () { zoomAt(1.25); });
+$("zoom-out").addEventListener("click", function () { zoomAt(0.8); });
+$("zoom-reset").addEventListener("click", function () { fitView(); });
+window.addEventListener("resize", function () {
+  if ($("screen-match").classList.contains("active")) fitView();
+});
 
 // ---- Chuyển quân: giữ tổng 5.000 (đã chốt) ----
 function convert(kind) {
