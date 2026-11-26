@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Host — Chiến Thuật 6 Người</title>
+<link rel="stylesheet" href="../styles.css">
+<style>
+  /* Host riêng: thẻ peer, mã phòng / mã trả lời. Dùng chung .card/.btn/.tag. */
+  .room-box {
+    margin: 14px 0; padding: 12px; text-align: center;
+    background: #0b0e13; border: 1px solid #d8a93c; border-radius: 8px;
+    font-size: 18px; letter-spacing: 2px;
+  }
+  .room-box strong { color: #d8a93c; }
+  .host-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .host-actions .btn { margin-top: 0; flex: 1; }
+  .host-players { margin: 14px 0; font-size: 14px; color: #c7ccd4; line-height: 1.7; }
+  .peer-card {
+    margin-top: 14px; padding: 14px;
+    background: #0b0e13; border: 1px solid #2a3342; border-radius: 8px;
+  }
+  .peer-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .peer-head strong { font-size: 15px; }
+  .peer-status { font-size: 12px; font-weight: 700; color: #f5c542; }
+  .peer-status.connected { color: #4ade80; }
+  .peer-name { margin-top: 6px; font-size: 14px; color: #c7ccd4; }
+  .peer-card label { margin-top: 14px; }
+  .peer-card .btn { margin-top: 8px; }
+  .code-box { font-family: ui-monospace, monospace; font-size: 12px; }
+</style>
+</head>
+<body>
+<div id="app">
+  <section class="screen active">
+    <div class="card wide">
+      <div class="game-title">HOST <span>CHIẾN THUẬT 6 NGƯỜI</span></div>
+      <div class="game-sub">3v3 · 1 Vua + 2 Tướng · P2P cùng 1 WiFi · Không dùng TURN relay</div>
+
+      <div class="room-box">PHÒNG: <strong id="room-name">—</strong></div>
+
+      <div class="host-actions">
+        <button id="btn-add-peer" class="btn secondary" type="button">THÊM CLIENT</button>
+        <button id="btn-open-barrier" class="btn primary" type="button" disabled>MỞ MÀN CHẮN</button>
+      </div>
+
+      <div id="host-players" class="host-players">Chưa có người chơi nào kết nối.</div>
+      <div id="host-log" class="p2p-log" aria-label="Nhật ký host"></div>
+      <div id="peers"></div>
+
+      <div class="card-foot"><span class="tag">HOST</span> Mở file này trên máy host. Client mở index.html, dán mã phòng, rồi đưa mã trả lời lại cho host.</div>
+    </div>
+  </section>
+</div>
+<script src="host.js"></script>
+</body>
+</html>
