@@ -92,13 +92,6 @@ input[type="text"], input[type="number"] {
 .team-card.blue { background: #1e40af; }
 .team-card.selected { border-color: #d8a93c; outline: 2px solid #d8a93c; }
 .team-chosen { margin-top: 12px; color: #c7ccd4; font-size: 14px; }
-.split-box { margin-top: 20px; padding: 14px; background: #0b0e13; border: 1px solid #2a3342; border-radius: 8px; }
-.split-head { font-size: 12px; font-weight: 800; letter-spacing: 1px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.split-row { display: flex; gap: 10px; align-items: end; margin-top: 10px; }
-.split-row label { margin: 0 0 4px; }
-.split-row input { max-width: 100px; }
-.split-row .btn { margin: 0; }
-.split-result { margin-top: 10px; font-size: 14px; color: #c7ccd4; }
 .draw-team { margin-bottom: 8px; color: #c7ccd4; }
 .draw-slots { display: flex; gap: 10px; margin: 16px 0; }
 .draw-slot {

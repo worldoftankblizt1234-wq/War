@@ -313,30 +313,8 @@ function renderAssignment() {
     (a.role === "king" ? "VUA (1 mạng)" : "TƯỚNG (3 mạng, 5.000 bộ binh)") + ".";
   $("btn-confirm-team").disabled = false;
 }
-$("btn-split").addEventListener("click", function () {
-  var total = parseInt($("total-players").value, 10);
-  var out = $("split-result");
-  if (!total || total < 2 || total > 12) {
-    out.textContent = "Nhập tổng số người từ 2 đến 12 (demo).";
-    return;
-  }
-  out.textContent = computeSplit(total).text;
-});
-function computeSplit(total) {
-  // Đã chốt: chẵn chia đôi, lẻ chia lệch, đội ít người +30% tiền.
-  if (total % 2 === 0) {
-    return { a: total / 2, b: total / 2, bonus: 0,
-      text: total + " người = " + (total / 2) + " vs " + (total / 2) + ". Chia đều, không cộng thêm tiền." };
-  }
-  var small = Math.floor(total / 2), large = Math.ceil(total / 2);
-  // Số tiền gốc 1.000 là số demo chưa chốt; chỉ tỉ lệ +30% là đã chốt.
-  var demoBase = DEMO_GOLD_START;
-  var demoBonusGold = Math.round(demoBase * 1.30);
-  return { a: small, b: large, bonus: 0.30,
-    text: total + " người = " + small + " vs " + large +
-      ". Đội " + small + " người (ít người hơn) được +30% tiền " +
-      "(demo: " + fmt(demoBase) + " → " + fmt(demoBonusGold) + " vàng)." };
-}
+// Chia đội và bốc Vua chỉ do host làm (host/host.js có computeSplit riêng).
+// Client chỉ nhận TEAM_ASSIGN từ host rồi bấm XÁC NHẬN ĐỘI — không có nút chia đội ở client nữa.
 $("btn-confirm-team").addEventListener("click", function () {
   if (!state.assignment) return;
   var a = state.assignment;

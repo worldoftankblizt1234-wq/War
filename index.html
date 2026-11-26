@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Game Client — Chiến Thuật 6 Người</title>
-<link rel="stylesheet" href="styles.css?v=4">
+<link rel="stylesheet" href="styles.css?v=5">
 </head>
 <body>
 <div id="app">
@@ -19,7 +19,7 @@
       <div class="field-error" id="name-error" aria-live="polite"></div>
       <button id="btn-enter-join" class="btn primary block">TIẾP TỤC</button>
       <div class="boot-error" id="boot-error" hidden></div>
-      <div class="card-foot"><span class="tag">P2P</span> Cùng 1 WiFi · Không dùng TURN relay <span class="ver">· v4</span></div>
+      <div class="card-foot"><span class="tag">P2P</span> Cùng 1 WiFi · Không dùng TURN relay <span class="ver">· v5</span></div>
     </div>
   </section>
 
@@ -73,16 +73,6 @@
         </div>
       </div>
       <div id="team-chosen" class="team-chosen">Chưa nhận đội từ host.</div>
-
-      <div class="split-box">
-        <div class="split-head">CHIA ĐỘI TỰ ĐỘNG <span class="tag">+30% TIỀN CHO ĐỘI ÍT NGƯỜI</span></div>
-        <div class="split-row">
-          <label for="total-players">Tổng số người</label>
-          <input id="total-players" type="number" min="2" max="12" value="7">
-          <button id="btn-split" class="btn secondary" type="button">Chia đội</button>
-        </div>
-        <div id="split-result" class="split-result">7 người = 3 vs 4 · Đội 3 người +30% tiền.</div>
-      </div>
 
       <button id="btn-confirm-team" class="btn primary block" disabled>XÁC NHẬN ĐỘI</button>
     </div>
@@ -165,8 +155,8 @@
   </section>
 
 </div>
-<script src="hex-geometry.js?v=4"></script>
-<script src="app.js?v=4"></script>
+<script src="hex-geometry.js?v=5"></script>
+<script src="app.js?v=5"></script>
 <script>
 // Kiểm tra khởi động: nếu app.js chết giữa chừng (VD: file JS chưa tải được),
 // nút sẽ liệt mà không có dấu hiệu gì. Hiện dòng báo đỏ để người dùng biết
