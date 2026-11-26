@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Game Client — Chiến Thuật 6 Người</title>
-<link rel="stylesheet" href="styles.css?v=5">
+<link rel="stylesheet" href="styles.css?v=6">
 </head>
 <body>
 <div id="app">
@@ -19,23 +19,23 @@
       <div class="field-error" id="name-error" aria-live="polite"></div>
       <button id="btn-enter-join" class="btn primary block">TIẾP TỤC</button>
       <div class="boot-error" id="boot-error" hidden></div>
-      <div class="card-foot"><span class="tag">P2P</span> Cùng 1 WiFi · Không dùng TURN relay <span class="ver">· v5</span></div>
+      <div class="card-foot"><span class="tag">P2P</span> Cùng 1 WiFi · Không dùng TURN relay <span class="ver">· v6</span></div>
     </div>
   </section>
 
   <!-- 2. Nhập mã phòng của host (kết nối P2P thật) -->
   <section id="screen-join" class="screen">
     <div class="card">
-      <div class="screen-title">NHẬP MÃ PHÒNG CỦA HOST</div>
-      <p class="muted">Cần có host trước: mở <b>host/host.html</b> trên 1 máy khác cùng WiFi, host đưa mã phòng cho bạn. Dán mã đó vào đây.</p>
-      <label for="host-offer-code">MÃ PHÒNG CỦA HOST</label>
-      <textarea id="host-offer-code" rows="4" placeholder="Dán mã phòng của host vào đây…"></textarea>
-      <button id="btn-connect-host" class="btn primary block">KẾT NỐI TỚI HOST</button>
+      <div class="screen-title">NHẬP MÃ PHÒNG</div>
+      <p class="muted">Mở <a href="host/host.html">trang tạo phòng</a> trên 1 máy khác cùng WiFi để lấy mã phòng, rồi dán mã đó vào đây.</p>
+      <label for="host-offer-code">MÃ PHÒNG</label>
+      <textarea id="host-offer-code" rows="4" placeholder="Dán mã phòng vào đây…"></textarea>
+      <button id="btn-connect-host" class="btn primary block">KẾT NỐI VÀO PHÒNG</button>
       <div id="answer-box" hidden>
-        <label for="client-answer-code">MÃ TRẢ LỜI CỦA BẠN — ĐƯA MÃ NÀY CHO HOST</label>
+        <label for="client-answer-code">MÃ TRẢ LỜI CỦA BẠN — ĐƯA MÃ NÀY CHO MÁY TẠO PHÒNG</label>
         <textarea id="client-answer-code" rows="4" readonly></textarea>
         <button id="btn-copy-answer" class="btn secondary block" type="button">SAO CHÉP MÃ TRẢ LỜI</button>
-        <p class="muted">Host dán mã này vào ô trả lời của host để hoàn tất kết nối. Sau đó bạn sang màn chắn và chờ lệnh mở thật từ host.</p>
+        <p class="muted">Máy tạo phòng dán mã này vào để hoàn tất kết nối. Sau đó bạn sang màn chắn và chờ lệnh mở.</p>
       </div>
       <div class="join-status" id="join-status"></div>
       <button id="btn-to-wait" class="btn primary block" disabled>TỚI MÀN CHẮN</button>
@@ -46,14 +46,14 @@
   <!-- 3. Màn chắn: đang chờ lệnh mở thật từ host -->
   <section id="screen-wait" class="screen">
     <div class="card">
-      <div class="screen-title">ĐANG CHỜ HOST KẾT NỐI</div>
+      <div class="screen-title">ĐANG CHỜ KẾT NỐI</div>
       <div class="barrier" aria-label="Màn chắn đang đóng">
         <div class="barrier-door left"></div>
         <div class="barrier-door right"></div>
         <span class="barrier-text">MÀN CHẮN ĐANG ĐÓNG</span>
       </div>
       <div class="wait-name">Xin chào, <strong id="wait-player-name">—</strong></div>
-      <div class="conn-status" id="conn-status">Đang chờ kết nối với host…</div>
+      <div class="conn-status" id="conn-status">Đang chờ kết nối…</div>
       <div class="p2p-log" id="p2p-log" aria-label="Nhật ký P2P"></div>
       <button id="btn-back-join" class="btn ghost block">Quay lại</button>
     </div>
@@ -63,7 +63,7 @@
   <section id="screen-team" class="screen">
     <div class="card wide">
       <div class="screen-title">ĐỘI CỦA BẠN</div>
-      <div class="team-assign-note" id="team-assign-note">Đang chờ host chia đội…</div>
+      <div class="team-assign-note" id="team-assign-note">Đang chờ chia đội…</div>
       <div class="teams">
         <div class="team-card red" id="team-red">
           <strong>ĐỘI ĐỎ</strong><span>1 Vua · 2 Tướng</span>
@@ -72,7 +72,7 @@
           <strong>ĐỘI XANH</strong><span>1 Vua · 2 Tướng</span>
         </div>
       </div>
-      <div id="team-chosen" class="team-chosen">Chưa nhận đội từ host.</div>
+      <div id="team-chosen" class="team-chosen">Chưa nhận đội.</div>
 
       <button id="btn-confirm-team" class="btn primary block" disabled>XÁC NHẬN ĐỘI</button>
     </div>
@@ -155,8 +155,8 @@
   </section>
 
 </div>
-<script src="hex-geometry.js?v=5"></script>
-<script src="app.js?v=5"></script>
+<script src="hex-geometry.js?v=6"></script>
+<script src="app.js?v=6"></script>
 <script>
 // Kiểm tra khởi động: nếu app.js chết giữa chừng (VD: file JS chưa tải được),
 // nút sẽ liệt mà không có dấu hiệu gì. Hiện dòng báo đỏ để người dùng biết

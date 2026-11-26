@@ -199,19 +199,19 @@ $("btn-back-name").addEventListener("click", function () { showScreen("screen-na
 // ---- 2. Nhập mã phòng của host, tạo mã trả lời (P2P thật) ----
 $("btn-connect-host").addEventListener("click", async function () {
   var code = $("host-offer-code").value.trim();
-  if (!code) { setJoinStatus("Chưa có mã phòng. Hãy dán mã phòng của host vào ô trên rồi bấm KẾT NỐI TỚI HOST."); return; }
+  if (!code) { setJoinStatus("Chưa có mã phòng. Hãy dán mã phòng vào ô trên rồi bấm KẾT NỐI VÀO PHÒNG."); return; }
   var offer;
   try {
     offer = decodeCode(code);
   } catch (e) {
-    setJoinStatus("Mã phòng không đúng định dạng. Hãy sao chép lại mã từ host.");
+    setJoinStatus("Mã phòng không đúng định dạng. Hãy sao chép lại mã từ máy tạo phòng.");
     return;
   }
   if (!offer || offer.type !== "offer" || !offer.sdp) {
-    setJoinStatus("Mã phòng không hợp lệ (thiếu SDP). Hãy sao chép lại mã từ host.");
+    setJoinStatus("Mã phòng không hợp lệ (thiếu SDP). Hãy sao chép lại mã từ máy tạo phòng.");
     return;
   }
-  setJoinStatus("Đang kết nối tới host" + (offer.room ? " (" + offer.room + ")" : "") + "…");
+  setJoinStatus("Đang kết nối vào phòng" + (offer.room ? " (" + offer.room + ")" : "") + "…");
   $("btn-connect-host").disabled = true;
   try {
     // Không có STUN/TURN: chỉ dùng host candidates trên cùng WiFi.
@@ -226,7 +226,7 @@ $("btn-connect-host").addEventListener("click", async function () {
     await waitIceComplete(state.pc);
     $("client-answer-code").value = encodeCode({ type: "answer", sdp: state.pc.localDescription.sdp });
     $("answer-box").hidden = false;
-    setJoinStatus("Đã tạo mã trả lời. Đưa mã này cho host để host hoàn tất kết nối, rồi bấm “Tới màn chắn”.");
+    setJoinStatus("Đã tạo mã trả lời. Đưa mã này cho máy tạo phòng để hoàn tất kết nối, rồi bấm “Tới màn chắn”.");
     $("btn-to-wait").disabled = false;
   } catch (err) {
     setJoinStatus("Kết nối lỗi: " + err.message + " Hãy kiểm tra lại mã phòng và thử lại.");
@@ -239,10 +239,10 @@ $("btn-copy-answer").addEventListener("click", function () {
 $("btn-to-wait").addEventListener("click", function () {
   $("wait-player-name").textContent = state.name;
   $("conn-status").textContent = state.connected
-    ? "Đã kết nối với host — chờ lệnh mở màn chắn."
-    : "Đang chờ host hoàn tất kết nối…";
-  $("p2p-log").textContent = "P2P: đã gửi mã trả lời cho host.\n" +
-    "P2P: chờ host hoàn tất kết nối và gửi lệnh OPEN_BARRIER.";
+    ? "Đã kết nối — chờ lệnh mở màn chắn."
+    : "Đang chờ hoàn tất kết nối…";
+  $("p2p-log").textContent = "P2P: đã gửi mã trả lời.\n" +
+    "P2P: chờ hoàn tất kết nối và lệnh OPEN_BARRIER.";
   showScreen("screen-wait");
 });
 $("btn-back-join").addEventListener("click", function () { showScreen("screen-join"); });
@@ -252,13 +252,13 @@ function setupDataChannel(dc) {
   state.dc = dc;
   dc.onopen = function () {
     state.connected = true;
-    $("conn-status").textContent = "Đã kết nối với host — chờ lệnh mở màn chắn.";
+    $("conn-status").textContent = "Đã kết nối — chờ lệnh mở màn chắn.";
     logP2P("P2P: kênh dữ liệu đã mở. Đã gửi JOIN { name: \"" + state.name + "\" }.");
     sendToHost({ type: "JOIN", name: state.name });
   };
   dc.onclose = function () {
     state.connected = false;
-    $("conn-status").textContent = "Đã mất kết nối với host.";
+    $("conn-status").textContent = "Đã mất kết nối.";
     logP2P("P2P: kênh dữ liệu đã đóng.");
   };
   dc.onmessage = function (ev) {
@@ -275,7 +275,7 @@ function sendToHost(msg) {
 function handleHostMessage(msg) {
   if (msg.type === "OPEN_BARRIER") {
     // Lệnh mở thật từ host — không còn mô phỏng.
-    logP2P("P2P: nhận lệnh { type: \"OPEN_BARRIER\" } từ host. Màn chắn đang mở…");
+    logP2P("P2P: nhận lệnh { type: \"OPEN_BARRIER\" }. Màn chắn đang mở…");
     document.querySelector("#screen-wait .barrier").classList.add("open");
     setTimeout(function () {
       showScreen("screen-team");
@@ -286,11 +286,11 @@ function handleHostMessage(msg) {
     state.assignment = msg;
     state.team = msg.team;
     state.role = msg.role;
-    logP2P("P2P: host chia đội — " + teamName(msg.team) + ", vai trò: " +
+    logP2P("P2P: đã chia đội — " + teamName(msg.team) + ", vai trò: " +
       (msg.role === "king" ? "Vua" : "Tướng") + ".");
     if ($("screen-team").classList.contains("active")) renderAssignment();
   } else if (msg.type === "STATE") {
-    logP2P("P2P: nhận cập nhật trạng thái từ host.");
+    logP2P("P2P: nhận cập nhật trạng thái.");
     if (typeof msg.gold === "number") { state.gold = msg.gold; updateHUD(); }
   }
 }
@@ -300,15 +300,15 @@ function renderAssignment() {
   var a = state.assignment;
   var note = $("team-assign-note");
   if (!a) {
-    note.textContent = "Đang chờ host chia đội…";
-    $("team-chosen").textContent = "Chưa nhận đội từ host.";
+    note.textContent = "Đang chờ chia đội…";
+    $("team-chosen").textContent = "Chưa nhận đội.";
     $("btn-confirm-team").disabled = true;
     return;
   }
   $("team-red").classList.toggle("selected", a.team === "red");
   $("team-blue").classList.toggle("selected", a.team === "blue");
   var bonusText = a.bonusPct ? " · Đội ít người +" + Math.round(a.bonusPct * 100) + "% tiền" : "";
-  note.textContent = "Host đã chia bạn vào " + teamName(a.team) + " (" + a.teamSize + " người" + bonusText + ").";
+  note.textContent = "Bạn được chia vào " + teamName(a.team) + " (" + a.teamSize + " người" + bonusText + ").";
   $("team-chosen").textContent = "Đã nhận đội: " + teamName(a.team) + ". Vai trò của bạn: " +
     (a.role === "king" ? "VUA (1 mạng)" : "TƯỚNG (3 mạng, 5.000 bộ binh)") + ".";
   $("btn-confirm-team").disabled = false;
