@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game Client — Chiến Thuật 6 Người (Demo)</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- 1. Màn hình chính: nhập tên -->
+  <section id="screen-name" class="screen active">
+    <div class="card">
+      <h1>Chiến Thuật 6 Người</h1>
+      <p class="subtitle">3v3 cổ đại / trung cổ — 1 Vua + 2 Tướng mỗi đội</p>
+      <p class="demo-note">Bản demo client — chưa phải game thật. Host chưa được xây dựng.</p>
+      <label for="player-name">Tên của bạn</label>
+      <input id="player-name" type="text" maxlength="20" placeholder="Nhập tên, ví dụ: Long" autocomplete="off">
+      <button id="btn-enter-wait" class="btn primary">Vào phòng chờ</button>
+      <p class="hint">P2P chỉ trên cùng 1 WiFi. Không dùng TURN relay.</p>
+    </div>
+  </section>
+
+  <!-- 2. Màn chắn: đang chờ host kết nối -->
+  <section id="screen-wait" class="screen">
+    <div class="card">
+      <h2>Đang chờ host kết nối</h2>
+      <div class="barrier" aria-label="Màn chắn đang đóng">
+        <div class="barrier-door left"></div>
+        <div class="barrier-door right"></div>
+        <span class="barrier-text">MÀN CHẮN ĐANG ĐÓNG</span>
+      </div>
+      <p>Xin chào, <strong id="wait-player-name">—</strong>. Hãy chờ host mở màn chắn.</p>
+      <div class="p2p-log" id="p2p-log" aria-label="Nhật ký P2P"></div>
+      <!-- Host chưa được xây dựng nên nút này chỉ mô phỏng lệnh thật. -->
+      <button id="btn-simulate-host" class="btn secondary">Mô phỏng lệnh mở từ host (OPEN_BARRIER)</button>
+      <p class="demo-note">Nút trên là mô phỏng demo. Lệnh P2P thật (OPEN_BARRIER) chưa được xây dựng vì host chưa có.</p>
+      <button id="btn-back-name" class="btn ghost">Quay lại nhập tên</button>
+    </div>
+  </section>
+
+  <!-- 3. Chọn đội -->
+  <section id="screen-team" class="screen">
+    <div class="card wide">
+      <h2>Chọn đội</h2>
+      <p>Màn chắn đã mở. Chọn đội Đỏ hoặc Xanh. Mỗi đội có 3 slot: 1 Vua + 2 Tướng.</p>
+      <div class="teams">
+        <button class="team-card red" id="team-red" type="button">
+          <strong>Đội Đỏ</strong><span>1 Vua + 2 Tướng</span><span class="slots" id="slots-red">Slot: Vua · Tướng · Tướng</span>
+        </button>
+        <button class="team-card blue" id="team-blue" type="button">
+          <strong>Đội Xanh</strong><span>1 Vua + 2 Tướng</span><span class="slots" id="slots-blue">Slot: Vua · Tướng · Tướng</span>
+        </button>
+      </div>
+      <p id="team-chosen">Chưa chọn đội.</p>
+
+      <div class="split-helper">
+        <h3>Trợ giúp chia đội (đã chốt)</h3>
+        <p>Chẵn người: máy tự chia đôi. Lẻ người: chia lệch, đội ít người hơn được <strong>+30% tiền</strong>.</p>
+        <label for="total-players">Tổng số người chơi</label>
+        <input id="total-players" type="number" min="2" max="12" value="7">
+        <button id="btn-split" class="btn secondary" type="button">Máy tự chia đội</button>
+        <p id="split-result">Ví dụ đã chốt: 7 người = 3 vs 4, đội 3 người được +30% tiền.</p>
+        <p class="demo-note">Số tiền gốc trong demo là số demo, chưa chốt. Chỉ có tỉ lệ +30% là đã chốt.</p>
+      </div>
+
+      <button id="btn-confirm-team" class="btn primary" disabled>Xác nhận đội</button>
+    </div>
+  </section>
+
+  <!-- 4. Bốc thăm Vua -->
+  <section id="screen-draw" class="screen">
+    <div class="card">
+      <h2>Bốc thăm Vua</h2>
+      <p>Đội của bạn: <strong id="draw-team">—</strong></p>
+      <p>Máy sẽ bốc ngẫu nhiên ai làm Vua trong đội (1 trong 3 người).</p>
+      <div class="draw-slots" id="draw-slots"></div>
+      <button id="btn-draw" class="btn primary">Bốc thăm</button>
+      <div id="draw-result" class="draw-result" hidden></div>
+      <button id="btn-to-loading" class="btn primary" disabled>Vào trận</button>
+    </div>
+  </section>
+
+  <!-- 5. Màn load -->
+  <section id="screen-loading" class="screen">
+    <div class="loading-wrap">
+      <h2>Đang vào trận…</h2>
+      <div class="loading-doors" id="loading-doors">
+        <div class="door left"></div>
+        <div class="door right"></div>
+        <span class="loading-text">ĐANG TẢI</span>
+      </div>
+      <div class="progress"><div id="progress-bar"></div></div>
+      <p id="progress-label">0%</p>
+      <p class="demo-note">Màn load demo — chưa tải tài nguyên thật.</p>
+    </div>
+  </section>
+
+  <!-- 6. Trong trận -->
+  <section id="screen-match" class="screen">
+    <header class="topbar">
+      <div class="stat-group common">
+        <strong>Thông số chung</strong>
+        <span>Vàng: <b id="stat-gold">1.000</b> <span class="demo-tag">demo</span></span>
+        <span>Dân: <b id="stat-pop">0</b> <span class="demo-tag">demo</span></span>
+        <span>Đất đang giữ: <b id="stat-land">0</b> ô</span>
+        <span>Thời gian: <b id="stat-time">00:00</b></span>
+      </div>
+      <div class="stat-group king" id="group-king">
+        <strong>Vua <span class="you-mark" id="mark-king" hidden>· BẠN</span></strong>
+        <span>Mạng: <b id="stat-king-lives">♥</b> (1 mạng)</span>
+        <span>Thủ đô: <b>100.000</b> quân</span>
+        <span>Trại tuyển quân: <b>có</b></span>
+      </div>
+      <div class="stat-group general" id="group-general">
+        <strong>Tướng <span class="you-mark" id="mark-general" hidden>· BẠN</span></strong>
+        <span>Mạng: <b id="stat-general-lives">♥♥♥</b> (3 mạng)</span>
+        <span>Quân: <b id="stat-troops">5.000</b> bộ binh</span>
+        <span>Trại lớn: <b>5</b> · Phó tướng: <b>5</b></span>
+      </div>
+    </header>
+
+    <div class="match-body">
+      <main class="map-wrap">
+        <div id="map" class="map" aria-label="Bản đồ lục giác 32x24"></div>
+        <p class="map-legend">
+          Xanh = đội Xanh · Đỏ = đội Đỏ · Xám = vùng trung lập chưa ai chiếm.
+          Vùng trung lập chỉ hiện màu phe khi phe đó tới chiếm.
+        </p>
+      </main>
+
+      <aside class="panel" id="hex-panel">
+        <h3>Ô đã chọn</h3>
+        <p id="hex-info">Bấm vào một ô trên map để xem địa hình, chi phí di chuyển, phòng thủ và hành động theo vai trò.</p>
+        <div id="hex-actions"></div>
+
+        <h3>Quân của Tướng</h3>
+        <p>Bộ binh: <b id="troop-infantry">5.000</b> · Cung thủ: <b id="troop-archer">0</b> · Máy bắn đá: <b id="troop-catapult">0</b></p>
+        <p class="hint">Chuyển quân giữ tổng 5.000 (đã chốt). Tuyển thêm sau này thì không giới hạn.</p>
+        <button id="btn-convert-archer" class="btn secondary" type="button">Chuyển 1.000 bộ binh → cung thủ</button>
+        <button id="btn-convert-catapult" class="btn secondary" type="button">Chuyển 1.000 bộ binh → máy bắn đá</button>
+        <p class="demo-note">Chuyển quân trong demo không tốn vàng. Mở khóa quân / vũ khí mới tốn vàng là luật đã chốt, số vàng cụ thể chưa chốt.</p>
+
+        <h3>Luật đã chốt (tóm tắt)</h3>
+        <ul class="rules">
+          <li>Tướng 3 mạng. Hồi sinh: căn cứ gốc → cung điện → căn cứ khác. Hết 3 mạng là chết hẳn, Vua tuyển Tướng mới thay đúng chỗ trống.</li>
+          <li>Vua 1 mạng. Vua chết là thua. Vua có thể chạy trốn với hộ tống tới căn cứ khác và chơi tiếp.</li>
+          <li>Vua xây thành / nhà, tăng dân, lo tuyển quân (trại tuyển quân).</li>
+          <li>Mỗi Tướng có 5 trại lớn (điểm hồi sinh, chứa quân) và 5 phó tướng chỉ huy theo lệnh.</li>
+          <li>Mỗi bên có 10 thành. Một khu dân cư chỉ tính là thành khi được bao quanh bởi tường dày 1 ô; thành gồm 19 ô (bán kính 2). 1 nhà ≈ 20 người.</li>
+          <li>Vùng trung lập: mỏ, nhà thờ, thành, đất bồi; không có núi. Ai cũng có thể chiếm.</li>
+          <li>Chia đội lẻ: đội ít người hơn được +30% tiền.</li>
+        </ul>
+      </aside>
+    </div>
+  </section>
+
+</div>
+<script src="app.js"></script>
+</body>
+</html>
