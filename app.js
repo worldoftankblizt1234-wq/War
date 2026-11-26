@@ -186,9 +186,11 @@ function fallbackCopy(text) {
 }
 
 // ---- 1. Nhập tên ----
+$("player-name").addEventListener("input", function () { $("name-error").textContent = ""; });
 $("btn-enter-join").addEventListener("click", function () {
   var name = $("player-name").value.trim();
-  if (!name) { alert("Hãy nhập tên trước."); return; }
+  if (!name) { $("name-error").textContent = "Hãy nhập tên trước rồi bấm TIẾP TỤC."; $("player-name").focus(); return; }
+  $("name-error").textContent = "";
   state.name = name;
   showScreen("screen-join");
 });
@@ -197,16 +199,16 @@ $("btn-back-name").addEventListener("click", function () { showScreen("screen-na
 // ---- 2. Nhập mã phòng của host, tạo mã trả lời (P2P thật) ----
 $("btn-connect-host").addEventListener("click", async function () {
   var code = $("host-offer-code").value.trim();
-  if (!code) { alert("Hãy dán mã phòng của host trước."); return; }
+  if (!code) { setJoinStatus("Chưa có mã phòng. Hãy dán mã phòng của host vào ô trên rồi bấm KẾT NỐI TỚI HOST."); return; }
   var offer;
   try {
     offer = decodeCode(code);
   } catch (e) {
-    alert("Mã phòng không đúng định dạng. Hãy sao chép lại mã từ host.");
+    setJoinStatus("Mã phòng không đúng định dạng. Hãy sao chép lại mã từ host.");
     return;
   }
   if (!offer || offer.type !== "offer" || !offer.sdp) {
-    alert("Mã phòng không hợp lệ (thiếu SDP). Hãy sao chép lại mã từ host.");
+    setJoinStatus("Mã phòng không hợp lệ (thiếu SDP). Hãy sao chép lại mã từ host.");
     return;
   }
   setJoinStatus("Đang kết nối tới host" + (offer.room ? " (" + offer.room + ")" : "") + "…");
@@ -227,7 +229,7 @@ $("btn-connect-host").addEventListener("click", async function () {
     setJoinStatus("Đã tạo mã trả lời. Đưa mã này cho host để host hoàn tất kết nối, rồi bấm “Tới màn chắn”.");
     $("btn-to-wait").disabled = false;
   } catch (err) {
-    setJoinStatus("Kết nối lỗi: " + err.message);
+    setJoinStatus("Kết nối lỗi: " + err.message + " Hãy kiểm tra lại mã phòng và thử lại.");
     $("btn-connect-host").disabled = false;
   }
 });
@@ -544,7 +546,7 @@ function selectHex(hex, el) {
   }
   if (role === "king" && (hex.terrain === "plains" || hex.terrain === "alluvial")) {
     addButton("Xây nhà — " + DEMO_HOUSE_COST + " vàng (demo)", function () {
-      if (state.gold < DEMO_HOUSE_COST) { alert("Không đủ vàng (demo)."); return; }
+      if (state.gold < DEMO_HOUSE_COST) { $("sel-note").textContent = "Không đủ vàng để xây nhà (demo)."; return; }
       state.gold -= DEMO_HOUSE_COST;
       state.pop += 20; // đã chốt: 1 nhà ≈ 20 người
       $("sel-note").textContent = "Đã xây 1 nhà: +20 dân.";
@@ -621,7 +623,7 @@ window.addEventListener("resize", function () {
 
 // ---- Chuyển quân: giữ tổng 5.000 (đã chốt) ----
 function convert(kind) {
-  if (state.troops.infantry < 1000) { alert("Không đủ bộ binh để chuyển (cần 1.000)."); return; }
+  if (state.troops.infantry < 1000) { var n = $("sel-note"); if (n) n.textContent = "Không đủ bộ binh để chuyển (cần 1.000)."; return; }
   state.troops.infantry -= 1000;
   state.troops[kind] += 1000;
   updateHUD();

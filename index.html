@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Game Client — Chiến Thuật 6 Người</title>
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.css?v=3">
 </head>
 <body>
 <div id="app">
@@ -16,6 +16,7 @@
       <div class="game-sub">3v3 · 1 Vua + 2 Tướng · Cổ đại / Trung cổ</div>
       <label for="player-name">TÊN CỦA BẠN</label>
       <input id="player-name" type="text" maxlength="20" placeholder="Nhập tên…" autocomplete="off">
+      <div class="field-error" id="name-error" aria-live="polite"></div>
       <button id="btn-enter-join" class="btn primary block">TIẾP TỤC</button>
       <div class="card-foot"><span class="tag">P2P</span> Cùng 1 WiFi · Không dùng TURN relay</div>
     </div>
@@ -25,7 +26,7 @@
   <section id="screen-join" class="screen">
     <div class="card">
       <div class="screen-title">NHẬP MÃ PHÒNG CỦA HOST</div>
-      <p class="muted">Host mở <b>host/host.html</b> và đưa mã phòng cho bạn. Dán mã đó vào đây.</p>
+      <p class="muted">Cần có host trước: mở <b>host/host.html</b> trên 1 máy khác cùng WiFi, host đưa mã phòng cho bạn. Dán mã đó vào đây.</p>
       <label for="host-offer-code">MÃ PHÒNG CỦA HOST</label>
       <textarea id="host-offer-code" rows="4" placeholder="Dán mã phòng của host vào đây…"></textarea>
       <button id="btn-connect-host" class="btn primary block">KẾT NỐI TỚI HOST</button>
@@ -163,7 +164,7 @@
   </section>
 
 </div>
-<script src="hex-geometry.js"></script>
-<script src="app.js"></script>
+<script src="hex-geometry.js?v=3"></script>
+<script src="app.js?v=3"></script>
 </body>
 </html>

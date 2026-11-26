@@ -166,16 +166,16 @@ function setPeerStatus(peer, text, connected) {
 function completePeer(peer) {
   if (peer.completed) return;
   var code = peer.els.answer.value.trim();
-  if (!code) { alert("Hãy dán mã trả lời của client trước."); return; }
+  if (!code) { setPeerStatus(peer, "Hãy dán mã trả lời của client vào ô trên trước.", false); return; }
   var answer;
   try {
     answer = decodeCode(code);
   } catch (e) {
-    alert("Mã trả lời không đúng định dạng.");
+    setPeerStatus(peer, "Mã trả lời không đúng định dạng. Hãy sao chép lại mã từ client.", false);
     return;
   }
   if (!answer || answer.type !== "answer" || !answer.sdp) {
-    alert("Mã trả lời không hợp lệ (thiếu SDP).");
+    setPeerStatus(peer, "Mã trả lời không hợp lệ (thiếu SDP).", false);
     return;
   }
   peer.pc.setRemoteDescription(new RTCSessionDescription({ type: "answer", sdp: answer.sdp }))
@@ -185,7 +185,8 @@ function completePeer(peer) {
       logHost("Client #" + peer.id + ": đã nhận mã trả lời, đang hoàn tất kết nối.");
     })
     .catch(function (err) {
-      alert("Hoàn tất kết nối lỗi: " + err.message);
+      setPeerStatus(peer, "Hoàn tất kết nối lỗi: " + err.message, false);
+      logHost("Client #" + peer.id + ": hoàn tất kết nối lỗi: " + err.message);
     });
 }
 
@@ -214,7 +215,7 @@ function updateOpenButton() {
 $("btn-open-barrier").addEventListener("click", function () {
   var connected = connectedPeers();
   if (!connected.length) {
-    alert("Chưa có client nào kết nối.");
+    logHost("Chưa có client nào kết nối — nút mở màn chắn đang bị vô hiệu hóa.");
     return;
   }
   // 1. Mở màn chắn cho tất cả client.
