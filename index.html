@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Game Client — Chiến Thuật 6 Người</title>
-<link rel="stylesheet" href="styles.css?v=3">
+<link rel="stylesheet" href="styles.css?v=4">
 </head>
 <body>
 <div id="app">
@@ -18,7 +18,8 @@
       <input id="player-name" type="text" maxlength="20" placeholder="Nhập tên…" autocomplete="off">
       <div class="field-error" id="name-error" aria-live="polite"></div>
       <button id="btn-enter-join" class="btn primary block">TIẾP TỤC</button>
-      <div class="card-foot"><span class="tag">P2P</span> Cùng 1 WiFi · Không dùng TURN relay</div>
+      <div class="boot-error" id="boot-error" hidden></div>
+      <div class="card-foot"><span class="tag">P2P</span> Cùng 1 WiFi · Không dùng TURN relay <span class="ver">· v4</span></div>
     </div>
   </section>
 
@@ -164,7 +165,20 @@
   </section>
 
 </div>
-<script src="hex-geometry.js?v=3"></script>
-<script src="app.js?v=3"></script>
+<script src="hex-geometry.js?v=4"></script>
+<script src="app.js?v=4"></script>
+<script>
+// Kiểm tra khởi động: nếu app.js chết giữa chừng (VD: file JS chưa tải được),
+// nút sẽ liệt mà không có dấu hiệu gì. Hiện dòng báo đỏ để người dùng biết
+// phải tải lại trang, thay vì bấm mãi không được.
+window.addEventListener("load", function () {
+  setTimeout(function () {
+    if (!window.__clientReady) {
+      var b = document.getElementById("boot-error");
+      if (b) { b.hidden = false; b.textContent = "Code game chưa tải được trên máy này — hãy tắt hẳn tab rồi mở lại link."; }
+    }
+  }, 1500);
+});
+</script>
 </body>
 </html>

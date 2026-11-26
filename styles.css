@@ -246,6 +246,8 @@ textarea {
 .muted { font-size: 13px; color: #9aa3ad; line-height: 1.5; }
 .join-status { margin-top: 12px; font-size: 14px; color: #f5c542; min-height: 20px; }
 .field-error { margin-top: 8px; font-size: 14px; color: #ff7b72; min-height: 20px; }
+.boot-error { margin-top: 10px; font-size: 14px; color: #ff7b72; }
+.ver { color: #6b7280; }
 .conn-status { margin: 8px 0; font-size: 14px; color: #f5c542; }
 .team-assign-note { margin-bottom: 12px; font-size: 14px; color: #f5c542; }
 .team-card { cursor: default; }

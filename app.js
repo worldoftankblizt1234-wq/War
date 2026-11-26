@@ -633,3 +633,7 @@ $("btn-convert-catapult").addEventListener("click", function () { convert("catap
 
 // Khởi tạo HUD lần đầu (trước khi vào trận, các số hiển thị là số demo/mặc định).
 updateHUD();
+
+// Đánh dấu đã khởi động xong — đoạn kiểm tra trong index.html dùng cờ này
+// để biết code có tải được hay không (nếu cờ này không bật, nút sẽ liệt).
+window.__clientReady = true;
